@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include "asm.h"
 }
 
 %{
@@ -9,6 +10,7 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
+  #include "asm.h"
 
   int yylex(void);
   void yyerror (char const *s) {
@@ -20,13 +22,12 @@
 %}
 
 %union {
-  int Integer;
-  char Registre[3];
+  int Valeur;
 };
 
+%token t_main
 %token t_cop t_afc t_pri t_add t_sou t_mul t_div
-%token <Integer> t_num
-%token <Registre> t_reg
+%token <Valeur> t_val
 
 %start File
 
@@ -34,7 +35,7 @@
 
 File:
     /* Vide */
-  | Instructions
+  | t_main Instructions { execute(); }
   ;
 
 Instructions:
@@ -43,20 +44,14 @@ Instructions:
   ;
 
 Instruction:
-    Operateur t_reg t_reg t_reg
-  | t_cop t_reg t_reg
-  | t_afc t_reg t_num
-  | t_pri t_reg
+    t_cop t_val t_val { add_instruction(COP, $2, $3, -1); }
+  | t_afc t_val t_val { add_instruction(AFC, $2, $3, -1); }
+  | t_pri t_val { add_instruction(PRI, $2, -1, -1); }
+  | t_add t_val t_val t_val { add_instruction(ADD, $2, $3, $4); }
+  | t_sou t_val t_val t_val { add_instruction(SOU, $2, $3, $4); }
+  | t_mul t_val t_val t_val { add_instruction(MUL, $2, $3, $4); }
+  | t_div t_val t_val t_val { add_instruction(DIV, $2, $3, $4); }
   ;
-
-Operateur:
-    t_add 
-  | t_sou
-  | t_mul
-  | t_div
-  ;
-
-
 
 %%
 

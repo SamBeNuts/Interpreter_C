@@ -1,5 +1,6 @@
 %{
   #include "y.tab.h"
+  #include "asm.h"
 %}
 
 %option noyywrap
@@ -9,7 +10,7 @@ spaces [ \t\n]+
 %%
 
 {spaces} ;
-
+"main:" return t_main;
 "COP" return t_cop;
 "AFC" return t_afc;
 "PRI" return t_pri;
@@ -17,13 +18,9 @@ spaces [ \t\n]+
 "SOU" return t_sou;
 "MUL" return t_mul;
 "DIV" return t_div;
-[R][0-9]{1,2} {
-  strcpy(yylval.Registre, yytext);
-  return t_reg;
-}
 [0-9]+ {
-  yylval.Integer=atoi(yytext);
-  return t_num;
+  yylval.Valeur=atoi(yytext);
+  return t_val;
 }
 
 %%
