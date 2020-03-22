@@ -8,15 +8,8 @@ struct instruction instructions[MAX_INSTRUCTIONS];
 
 int cmpt_instructions = 0;
 
-int breakpoints[100];
-int cmpt_breakpoints = 0;
-
-char mode = '\n';
-
 int print_buffer[100];
 int cmpt_print_buffer = 0;
-
-char *str_instructions[7] = {"COP", "AFC", "PRI", "ADD", "SOU", "MUL", "DIV"};
 
 void execute()
 {
@@ -84,6 +77,15 @@ void execute_instruction(int index)
   }
 }
 
+/* AFFICHAGE */
+
+int breakpoints[100];
+int cmpt_breakpoints = 0;
+
+char mode = '\n';
+
+char *str_instructions[7] = {"COP", "AFC", "PRI", "ADD", "SOU", "MUL", "DIV"};
+
 void print_registers()
 {
   int i;
@@ -99,26 +101,49 @@ void print_registers()
 void print_instructions(int line)
 {
   int i;
-  struct instruction inst;
   for (i = line - 2; i <= line + 2; i++)
   {
     if (i < 0)
       printf("  START\n");
     else if (i < cmpt_instructions)
     {
-      inst = instructions[i];
       if (i == line)
         printf("> ");
       else if (check_breakpoints(i))
         printf("o ");
       else
         printf("  ");
-      printf("%s %d %d %d\n", str_instructions[inst.type - 1], inst.val1, inst.val2, inst.val3);
+      print_instruction(instructions[i]);
+      printf("\n");
     }
     else
       printf("  END\n");
   }
   printf("\n");
+}
+
+void print_instruction(struct instruction inst)
+{
+  printf("%s %d", str_instructions[inst.type - 1], inst.val1);
+  if (inst.val2 != -1)
+    printf(" %d", inst.val2);
+  if (inst.val3 != -1)
+    printf(" %d", inst.val3);
+}
+
+void print_program()
+{
+  int i;
+  printf("\e[1;1H\e[2J");
+  for (i = 0; i < cmpt_instructions; i++)
+  {
+    printf("%5d  ", i + 1);
+    print_instruction(instructions[i]);
+    printf("\n");
+  }
+  printf("\n");
+  printf("[Enter] Close ");
+  getchar();
 }
 
 void print_printbuffer()
@@ -136,20 +161,27 @@ void print_printbuffer()
 
 int print_input_mode(int line)
 {
+  int pass = 1;
   if (mode != 'r' || check_breakpoints(line))
   {
-    printf("[Enter] Step by step | [r] Run | [b n] Breakpoint line n (same to remove)\n");
+    printf("[Enter] Step by step | [r] Run | [b n] Breakpoint line n (same to remove) | [p] print program\n");
     printf("Mode : ");
     scanf("%c", &mode);
     if (mode == 'b')
     {
       add_breakpoint();
+      pass = 0;
+    }
+    if (mode == 'p')
+    {
+      print_program();
+      pass = 0;
     }
     if (mode != '\n')
       getchar();
   }
   printf("\n");
-  return (mode != 'b');
+  return pass;
 }
 
 void add_breakpoint()

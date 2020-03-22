@@ -30,6 +30,10 @@ void print_registers();
 
 void print_instructions(int line);
 
+void print_instruction(struct instruction inst);
+
+void print_program();
+
 void print_printbuffer();
 
 int print_input_mode(int line);
